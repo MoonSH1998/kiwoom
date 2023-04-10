@@ -1,5 +1,5 @@
 var Config = {
-    url: "http://localhost:8091",
+    url: "http://localhost:8092",
     platform: null,
 
     getUserImgUrl: function(mid, file) {

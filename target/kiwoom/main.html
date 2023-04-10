@@ -12,6 +12,14 @@
 <body style="background-color:#0E58D6">
 <div class="container d-flex flex-column gap-3" style="padding:22px">
 <!--    <div role="button" class="btn-signup text-center" onclick="SSO.logout()">로그아웃</div>-->
+    <div role="button" class="text-center">내 정보 수정</div>
+    <div role="button" class="text-center">현재 날씨</div>
+    <div class="d-flex">
+        <div id="--weather--cur__temp"></div>
+        <div id="--weather--cur__desc"></div>
+        <div class="icon" id="--weather--cur__icon" style="height: 25px;width: 25px;background-position: center;background-size: 100%;background-repeat: no-repeat;border-radius: 13%;">
+        </div>
+    </div>
     <div role="button" class="btn-signup text-center" onclick="logout()">로그아웃</div>
 </div>
 </body>
@@ -34,6 +42,7 @@
         //     Page.go("index.html")
 
         pagectx = params;
+        getLocation();
 
         Page.setHandler();
     }
@@ -41,6 +50,47 @@
         AJAX.call("jsp/logout.jsp", null, function () {
             Page.go("index.html");
         });
+    }
+
+    function getLocation(){
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            console.log("Geolocation is not supported by this browser.");
+        }
+    }
+    function showPosition(position) {
+        var lat = position.coords.latitude;
+        var lon = position.coords.longitude;
+        setWeather_location(lat,lon);
+    }
+
+    async function setWeather_location(lat, lon) {
+        const _weather = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=kr&appid=df2e0482451210d91b066313c0527bcf`);
+        const weather = await _weather.json();
+        const _icon = await fetch(`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`);
+        const url =  _icon.url;
+        $('#--weather--cur__temp').html(`${weather.main.temp}º`);
+        $('#--weather--cur__desc').html(weather.weather[0].description);
+        $('#--weather--cur__icon').css("background-image", `url(${url})`);
+        // $('#--weather--cur__region').html(city_name);
+    }
+
+    async function setWeather(addrcode) {
+        //addrcode 적용 후 사용
+        if(addrcode == undefined){
+            return $(".header-weather").addClass("hide");
+        }
+        const city = AddrKo.getCityCoords(addrcode);
+        const city_name = AddrKo.getCityName(addrcode);
+        const _weather = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${city[0]}&lon=${city[1]}&units=metric&lang=kr&appid=df2e0482451210d91b066313c0527bcf`);
+        const weather = await _weather.json();
+        const _icon = await fetch(`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`);
+        const url =  _icon.url;
+        $('#--weather--cur__temp').html(`${weather.main.temp}º`);
+        $('#--weather--cur__desc').html(weather.weather[0].description);
+        $('#--weather--cur__icon').css("background-image", `url(${url})`);
+        $('#--weather--cur__region').html(city_name);
     }
 
 </script>
