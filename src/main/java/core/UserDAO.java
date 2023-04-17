@@ -120,7 +120,69 @@ public class UserDAO {
             if (stmt != null) stmt.close();
             if (conn != null) conn.close();
         }
-    };
+    }
+
+    // Invoked from userInfo.jsp (without address) from userInfo.html
+    public void update(String mid, JSONObject jsonobj) throws NamingException, SQLException {
+        Connection conn = ConnectionPool.get();
+        PreparedStatement stmt = null;
+        try {
+            String sql = "UPDATE user SET jsonstr = ? WHERE mid = ?";
+
+            if (mid.equals("admin@gmd.com") || mid.equals("hgkim@syu.ac.kr")) {
+                jsonobj.put("admin", "T");
+            }
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, jsonobj.toJSONString());
+            stmt.setString(2, mid);
+
+            stmt.executeUpdate();
+
+        } finally {
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        }
+    }
+
+    // Invoked from userInfo.jsp (with address) from userAddr.html
+    public void update(String mid, String addrcode, JSONObject jsonobj) throws NamingException, SQLException {
+        Connection conn = ConnectionPool.get();
+        PreparedStatement stmt = null;
+        try {
+            String sql = "UPDATE user SET addrcode = ?, jsonstr = ? WHERE mid = ?";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, addrcode);
+            stmt.setString(2, jsonobj.toJSONString());
+            stmt.setString(3, mid);
+
+            stmt.executeUpdate();
+
+        } finally {
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        }
+    }
+
+    // Invoked from userInfo.jsp (with address) from admUserInfo.html
+    public void update(String mid, String pass) throws NamingException, SQLException {
+        Connection conn = ConnectionPool.get();
+        PreparedStatement stmt = null;
+        try {
+            String sql = "UPDATE user SET password = ? WHERE mid = ?";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, MD5.get(pass));
+            stmt.setString(2, mid);
+
+            stmt.executeUpdate();
+
+        } finally {
+            if (stmt != null) stmt.close();
+            if (conn != null) conn.close();
+        }
+    }
 
 
 

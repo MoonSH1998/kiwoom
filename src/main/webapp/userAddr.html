@@ -1,0 +1,167 @@
+<html>
+<head>
+    <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=0, viewport-fit=cover">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <!--    <link rel="shortcut icon" href="images/main-logo.png">-->
+    <link rel="stylesheet" type="text/css" href="css/core.css" media="only screen">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <title>kiwoom</title>
+    <style>
+        li{
+            margin-right: 10px;
+        }
+        .edit-box {
+            display: block;
+        }
+    </style>
+</head>
+<body style="background-color:#0E58D6">
+    <div class="container d-flex flex-column gap-3" style="padding:22px">
+        <div class="addbox">
+            <div class="btn-back-arrow" onclick="Page.back()"></div>
+            <div>내 주소 수정</div>
+            <div class="btn-text" onclick="done()">저장</div>
+        </div>
+        <div class="page-body ptop-50">
+            <div class="vframe-3">
+                <div class="user-info-pane-title pad-20">시군구 주소</div>
+                <div class="section pad-20"><div class="section bg-white">
+                    <div class="edit-box mtop-15">
+                        <div class="icon addr hide"></div>
+                        <div class="text">광역명</div>
+                        <select id="--metro"></select>
+                    </div>
+                    <div class="edit-box">
+                        <div class="icon addr hide"></div>
+                        <div class="text">시군구</div>
+                        <select id="--city"></select>
+                    </div>
+                </div></div>
+
+                <div class="user-info-pane-title pad-20">상세 주소</div>
+                <div class="section pad-20"><div class="section bg-white ">
+                    <div class="edit-box mtop-15">
+                        <div class="section">
+                            <input id="--street" type="text" placeholder="예) 동해대로 4833">
+                        </div>
+                    </div>
+                </div></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="../js/jquery-3.5.1.min.js"></script>
+<script src="../js/core.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    Page.init("userAddr.html", init);
+});
+</script>
+
+<script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap.bundle.js"></script>
+<script src="../js/velocity.min.js"></script>
+<script src="../js/addr.js"></script>
+<script>
+var pagectx = {};
+function init(params) {
+    pagectx = params;
+    
+    if (pagectx.usrobj == null) {
+        Page.back();
+        return;
+    }
+
+    if (pagectx.mid != null) {
+        AJAX.call("jsp/userGet.jsp", {mid: pagectx.mid}, function(data) {
+            pagectx.usrobj = JSON.parse(data.trim());
+            setPage(pagectx.usrobj);
+        }); 
+        
+        // clear parameter cache because it is called in another way by userInfo.html 
+        // which does not use "mid" as a parameter  
+    	SessionStore.remove("userAddr.html");
+    }
+    else {
+        setPage(pagectx.usrobj);
+    }
+}
+
+function setPage(usrobj) {
+    console.log(usrobj);
+    
+    var str = "<option value='none'>선택해 주세요.</option>";
+    pagectx.metros = AddrKo.getMetroList();
+    for (var i=0; i<pagectx.metros.length; i++) {
+        str += "<option value='" + pagectx.metros[i][0] + "'>" + pagectx.metros[i][1] + "</option>";
+    }
+    $("#--metro").html(str);
+    
+    var addrcode = (usrobj.addrobj != null) ? usrobj.addrobj.code + "" : "260000";
+    selectCity(addrcode);
+    
+    if (usrobj.addrobj != null) {
+        $("#--street").val(usrobj.addrobj.street);
+    }
+    
+    // set event handlers ------------------------------------------
+    $("#--metro").change(function(){
+        if ($(this).val() != null) selectCity($(this).val());
+    });
+
+    Page.setHandler();
+}
+
+function selectCity(addrcode) {
+    var metro = addrcode.substring(0, 2) + "0000";
+    $("#--metro").val(metro).prop("selected", true);
+
+    pagectx.cities = AddrKo.getCityList(metro);
+
+       var str = "<option value='none'>선택해 주세요.</option>";
+       for (var i=0; i<pagectx.cities.length; i++) {
+           var sel = (pagectx.cities[i][0] == addrcode) ? " selected" : "";
+           str += "<option value='" + pagectx.cities[i][0] + "'" + sel + ">" + pagectx.cities[i][1] + "</option>";
+       }
+       $("#--city").html(str);
+}
+
+function done() {
+    var metro = $("#--metro option:selected").val();
+    if (metro == "none") {
+        Dialog.alert("광역 단위 주소를 선택해주세요.");
+        return null;
+    }
+    
+    var addrcode = $("#--city option:selected").val();
+    if (addrcode == "none") {
+        Dialog.alert("시군구 단위 주소를 선택해주세요.");
+        return null;
+    }
+    
+    var street = $("#--street").val().trim();
+    var addrobj = {code: addrcode, street: street};
+    
+    var usrobj = pagectx.usrobj;
+    usrobj.addrobj = addrobj;
+    
+    var params = new FormData();
+    params.append("mid", usrobj.mid);
+    params.append("usrobj", JSON.stringify(usrobj));
+    console.log(usrobj)
+    
+    if (pagectx.sesup == "F") {	// when invoked from admUserInfo.html
+        params.append("sesup", "F");
+    }
+    AJAX.call("jsp/userInfo.jsp", params, function(data) {
+        Dialog.alert("주소 설정이 완료되었습니다.", function() {
+            //Page.back();
+            //페이지 뒤로 가면서 새로고침 -> 주소 변경 후 주소에 전에 있던 주소가 남아있는 현상 해결
+            location.href = document.referrer;
+        });
+    }, true);
+}
+</script>

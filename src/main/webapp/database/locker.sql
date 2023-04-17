@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS user (
     mid VARCHAR(128) PRIMARY KEY,
     password VARCHAR(32),
     type CHAR(4) DEFAULT 'U',
+    addrcode INT DEFAULT 260100,
     authcode VARCHAR(32),
     jsonstr VARCHAR(1024),
     ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP
