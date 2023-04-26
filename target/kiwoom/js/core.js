@@ -53,68 +53,19 @@ let AJAX = {
 //Dialog object
 
 var Dialog = {
-    // init: function () {
-    //     $("body").append(this._generate());
-    //
-    //     $(window).resize(function() {
-    //         Dialog.resize();
-    //     });
-    // },
+    init: function () {
+        $("body").append(this._generate());
 
-    okCallback: null,
-    cancelCallback: null,
-    data: {},
-    modal: null,
-
-    init: function() {
-        $("body .container").append(`<div id="dialog" class="modal show" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title"></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                    </div>
-                    <div class="modal-footer">
-                        <button id="dialogCancel" type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <button id="dialogOk" type="button" class="btn btn-sm btn-primary">확인</button>
-                    </div>
-                </div>
-            </div>
-        </div>`);
-
-        Dialog.modal = new bootstrap.Modal(document.getElementById('dialog'),{});
-
-        $('#dialogOk').on('click', function() {
-            Dialog.hide();
-            if (Utils.isValid(Dialog.okCallback)) {
-                Dialog.okCallback(Dialog.data);
-                Dialog.okCallback = null;
-            }
-            if (Utils.isValid(Dialog.cancelCallback)) {
-                Dialog.cancelCallback = null;
-            }
+        $(window).resize(function() {
+            Dialog.resize();
         });
-
-        $('#dialogCancel').on('click', function() {
-            Dialog.hide();
-            if (Utils.isValid(Dialog.okCallback)) {
-                Dialog.okCallback = null;
-            }
-            if (Utils.isValid(Dialog.cancelCallback)) {
-                Dialog.cancelCallback(Dialog.data);
-                Dialog.cancelCallback = null;
-            }
-        });
-
     },
 
     _generate: function() {
         var str = "<div id='--dialog' class='dialog'><div class='wrapper'>";
-        str += "<div id='--dialog-del' class='del-btn' onclick='Dialog.reset()'></div>";
+        str += "<div id='--dialog-del' class='del-btn hide' onclick='Dialog.reset()'></div>";
         str += "<div id='--dialog-cnt' class='contents'></div>";
-        str += "</div>";
+        str += "</div></div>";
         return str;
     },
 
@@ -149,7 +100,7 @@ var Dialog = {
 
     set: function(showDel) {
         this.show();
-        // this.disableScroll();
+        this.disableScroll();
         this.ignoreHideProgress = true;
 
         $("body").on('keyup', function(e) {
@@ -163,24 +114,13 @@ var Dialog = {
             }
         });
 
-    },
-    set2: function(showDel) {
-        this.show();
-        this.ignoreHideProgress = true;
-
-        $("body").on('keyup', function(e) {
-            if (e.keyCode == 27) {
-                Dialog.onCancel();
-                console.log(e)
-            }
-            else if (e.keyCode == 13) {
-                if ($('#--dialog-ok').length) {
-                    //Dialog.onConfirm();
-                    console.log(e)
-                }
-            }
-        });
-
+        // show delete button on the right top of the dialog
+        if (showDel) {
+            $("#--dialog-del").removeClass("hide");
+        }
+        else {
+            $("#--dialog-del").addClass("hide");
+        }
     },
 
     reset: function() {
@@ -191,54 +131,63 @@ var Dialog = {
     },
 
 
+    // Progress dialog ----------------------------------------------------------
+    //
+
+    showProgress: function(msg) {
+        if (!isValid(msg)) msg = "데이터 처리중입니다.<br>잠시만 기다려주세요.";
+
+        var str = "<div class='desc'>" + msg;
+        str += "<div class='inner-center mbot-10'><img src='images/loading.gif' height=50 style='z-index: 100'></div>";
+        str += "</div>";
+
+        $('#--dialog-cnt').html(str);
+
+        this.show();
+    },
+
+    ignoreHideProgress: false,
+    hideProgress: function() {
+        if (!this.ignoreHideProgress) this.hide();
+    },
+
 
     // Other dialogs ---------------------------------------------------------------
     //
 
     cbFunc: null,
     cbFuncCancel: null,
-    // alert: function(msg, cbfunc) {
-    //     this.cbFunc = cbfunc;
-    //     this.cbFuncCancel = cbfunc;
-    //
-    //     var str = "<div class='desc mbot-25'>" + msg + "</div>";
-    //     str += "<div id='--dialog-ok' class='button' onclick='Dialog.onConfirm()'>확인</div>";
-    //
-    //     $('#--dialog-cnt').html(str);
-    //
-    //     this.set2();
-    // },
+    alert: function(msg, cbfunc) {
+        this.cbFunc = cbfunc;
+        this.cbFuncCancel = cbfunc;
 
-    alert: function(msg, okCallback, data) {
-        Dialog.okCallback = okCallback;
-        Dialog.cancelCallback = okCallback;
-        Dialog.data = data;
+        var str = "<div class='desc mbot-25'>" + msg + "</div>";
+        str += "<div id='--dialog-ok' class='button' onclick='Dialog.onConfirm()'>확인</div>";
 
-        $('#dialog .modal-body').html(`<div>${msg}</div>`);
-        Dialog.title('');
-        $('#dialogCancel').hide();
-        Dialog.show();
-        return Dialog;
-    },
+        $('#--dialog-cnt').html(str);
 
-    title: function(title){
-        $('#dialog .modal-title').html(title);
-    },
-    show: function() {
-        Dialog.modal.show();
-    },
-    hide: function() {
-        Dialog.modal.hide();
+        this.set();
     },
 
     confirm: function(msg, cbfunc, cbload, options) {
-        this.okCallback = cbfunc;
-        this.cancelCallback = cbload;
+        this.cbFunc = cbfunc;
+        this.cbFuncCancel = cbload;
         if (!isValid(options)) options = {};
 
-        let str = `<div>${msg}</div>`;
-        $('#dialog .modal-title').html("");
-        $('#dialog .modal-body').html(str);
+        var str = "<div class='desc mbot-25'>" + msg + "</div>";
+        str += "<div class='dis-f'>"
+        str += "<div class='section w50'>";
+        str += "<div id='--dialog-cancel' class='button white' onclick='Dialog.onCancel()'>";
+        str += (options.yesno ? "아니오" : "취소") + "</div>";
+        str += "</div>";
+        str += "<div class='section w50'>";
+        str += "<div id='--dialog-ok' class='button' onclick='Dialog.onConfirm()'>";
+        str += (options.yesno ? "네" : "확인")  + "</div>";
+        str += "</div>";
+        str += "</div>";
+
+        $('#--dialog-cnt').html(str);
+
         this.set();
     },
 
@@ -312,7 +261,101 @@ var Dialog = {
 
         this.set();
     },
-}
+    select2: function(list, cbfunc, showicn) {
+        this.cbSelect = cbfunc;
+
+        var str = "<div class='dialog-sel_rep'>";
+        var cnt = 0;
+        for (var i=0; i<list.length; i++) {
+            if (i == 0) {
+                var title = (list[0].icon == "title") ? list[0].text : "선택해 주세요.";
+                //str += "<div class='title'><div class='pad-24'></div></div>";
+                str += "<div class='section pad-25 mtop-10 mbot-10'>";
+            }
+            if (list[i].icon == "title") continue;
+
+            var cmd = (list[i].disabled != true) ? " onclick='Dialog.onSelect(" + i + ")'" : "";
+            var gray = (list[i].disabled == true) ? " lightgray" : "";
+            var bdtop = (cnt++ > 0) ? " bdtop-eee" : "";
+
+
+            str += "<div class='section dis-f" + bdtop + "'" + cmd + ">";
+            if (showicn == true) {
+                str += "<div class='text" + gray + " "+list[i].icon+"'>" + list[i].text + "</div>";
+                //str += "<div class='icon pointer " + list[i].icon + "'></div>";
+            }
+            else {
+                str += "<div class='text wid-100" + gray + "'>" + list[i].text + "</div>";
+            }
+            str += "</div>";
+        }
+        if (list.length > 0) {
+            str += "</div>";
+        }
+        str += "</div>";
+
+        $('#--dialog-cnt').html(str);
+
+        setTimeout(function() {
+            $("html").click(function(e) {
+                if($(e.target).hasClass("dialog")) {
+                    Dialog.reset();
+                    $("html").off("click");
+                }
+            });
+        }, 50);
+
+        this.set();
+    },
+
+    onSelect: function(index) {
+        this.reset();
+        if (isValid(this.cbSelect)) {
+            this.cbSelect(index);
+            this.cbSelect = null;
+        }
+    },
+
+
+    // Enabling and disabling scroll events ---------------------------------------------------------------
+    // left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
+    keys: {32: 1, 33: 1, 34: 1, 35: 1, 36: 1, 37: 1, 38: 1, 39: 1, 40: 1},
+
+    preventDefault: function(e) {
+        e = e || window.event;
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+        e.returnValue = false;
+    },
+
+    preventDefaultForScrollKeys: function(e) {
+        if (Dialog.keys[e.keyCode]) {
+            Dialog.preventDefault(e);
+            return false;
+        }
+    },
+
+    disableScroll: function() {
+        if (window.addEventListener) { // older FF
+            window.addEventListener('DOMMouseScroll', this.preventDefault, false);
+        }
+        window.onwheel = this.preventDefault; // modern standard
+        window.onmousewheel = document.onmousewheel = this.preventDefault; // older browsers, IE
+        window.ontouchmove = this.preventDefault; // mobile
+        document.onkeydown = this.preventDefaultForScrollKeys;
+    },
+
+    enableScroll: function() {
+        if (window.removeEventListener) {
+            window.removeEventListener('DOMMouseScroll', this.preventDefault, false);
+        }
+        window.onmousewheel = document.onmousewheel = null;
+        window.onwheel = null;
+        window.ontouchmove = null;
+        document.onkeydown = null;
+    },
+};
 
 let ImageList = {
     curidx: 0,
@@ -930,7 +973,7 @@ var SwipeHandler = {
 }
 
 let SNS = {
-    kakaoJSkey: "",
+    kakaoJSkey: "428a2324cf05780715fdf11b70ed2c9f",
 
     init: function (src) {
         // pc, 모바일, android, ios에 따라서 불러오는거 다르게 하도록 설정할 것
@@ -942,18 +985,33 @@ let SNS = {
         });
     },
 
-    share: function (fid) {
-        let feed = CacheMgr.getFeed(fid);
-        if (feed == null) {
-            AJAX.call("jsp/feedGet.jsp", {fid: fid}, function(data) {
-                console.log("[CacheMgr.getFeed] fetch a new feed from the server for share...");
-                let feed = JSON.parse(data.trim());
-                console.log(feed);
-                if (feed != null) SNS._share(feed);
-            });
-        } else {
-            SNS._share(feed);
+    _share: function (temp,description,url,city_name) {
+
+        let content = {
+            title: `오늘 ${city_name}의 날씨를 알려드립니다.`,
+            description: `온도:${temp} / 날씨:${description}`,
+            imageUrl :Config.url + "/main.html",
+            link: {
+                webUrl: Config.url + "/main.html",
+                mobileWebUrl: Config.url + "/main.html",
+            }
         }
+
+        // let imgurl = `url(${url})`;// : "images/fox_logo_share_1.png";
+
+        // if (Config.platform !== "pc") {
+        //     imgurl = imgurl.slice(3);
+        // }
+        let feedObj = {
+            objectType: "feed",
+        };
+        content.imageUrl = url;
+        feedObj.content = content;
+
+        console.log(feedObj)
+
+        Kakao.Link.sendDefault(feedObj);
+
     },
 }
 

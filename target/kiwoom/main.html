@@ -12,23 +12,36 @@
 <!--    col-4-->
 <!--    -->
 </head>
-<body style="background-color:#0E58D6">
-<div class="container d-flex flex-column gap-3" style="padding:22px">
-    <header class="header">
-        <div class="d-flex align-items-center">
-            <div class="">메인페이지입니다.</div>
-            <div class="profileImg" style="width:25px;height: 25px;radius:50%;background-color: red;"></div>
+<body>
+<div class="container">
+    <header class="header m-bottom-20">
+        <div class="dflex">
+            <div class="fs-26  ">메인페이지입니다.</div>
+            <div class="profileImg "></div>
         </div>
     </header>
-<!--    <div role="button" class="btn-signup text-center" onclick="SSO.logout()">로그아웃</div>-->
+
     <div role="button" class="text-center" onclick="Page.go('userInfo.html')">내 정보 수정</div>
-    <div role="button" class="text-center">현재 날씨</div>
-    <div class="d-flex">
+
+    <div class="text-center dflex">현재 날씨</div>
+
+    <div class="dflex">
+        <div id="--weather--cur__region"></div>
         <div id="--weather--cur__temp"></div>
         <div id="--weather--cur__desc"></div>
         <div class="icon" id="--weather--cur__icon" style="height: 25px;width: 25px;background-position: center;background-size: 100%;background-repeat: no-repeat;border-radius: 13%;">
         </div>
     </div>
+
+    <div class="dflex">
+        <div id="--weather--cur__region2">현재 위치 날씨:     </div>
+        <div id="--weather--cur__temp2"></div>
+        <div id="--weather--cur__desc2"></div>
+        <div class="icon" id="--weather--cur__icon2" style="height: 25px;width: 25px;background-position: center;background-size: 100%;background-repeat: no-repeat;border-radius: 13%;">
+        </div>
+    </div>
+
+    <div class="sBtn" onclick="sBtn()">날씨공유</div>
     <div role="button" class="btn-signup text-center" onclick="logout()">로그아웃</div>
 </div>
 </body>
@@ -36,6 +49,7 @@
 <script src="js/jquery-3.5.1.min.js"></script>
 <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
 <script src="js/core.js"></script>
+<script src="js/addr.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         Page.init(location.pathname, init, {nolog: true});
@@ -47,14 +61,24 @@
 <script type="text/javascript">
     var pagectx = {};
     function init(params) {
-        // if(pagectx.usrobj?.mid == undefined)
-        //     Page.go("index.html")
 
         pagectx = params;
         getLocation();
-
+        setWeather(pagectx.addrcode);
         Page.setHandler();
+        Kakao.init("428a2324cf05780715fdf11b70ed2c9f");
+
     }
+    function sBtn(){
+
+        var temp = sessionStorage.getItem("temp");
+        console.log(temp)
+        var description = sessionStorage.getItem("description");
+        var url = sessionStorage.getItem("url");
+        var city_name = sessionStorage.getItem("city_name");;
+        SNS._share(temp,description,url,city_name);
+    }
+
     function logout(){
         AJAX.call("jsp/logout.jsp", null, function () {
             Page.go("index.html");
@@ -79,19 +103,20 @@
         const weather = await _weather.json();
         const _icon = await fetch(`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`);
         const url =  _icon.url;
-        $('#--weather--cur__temp').html(`${weather.main.temp}º`);
-        $('#--weather--cur__desc').html(weather.weather[0].description);
-        $('#--weather--cur__icon').css("background-image", `url(${url})`);
+
+        $('#--weather--cur__temp2').html(`${weather.main.temp}º`);
+        $('#--weather--cur__desc2').html(weather.weather[0].description);
+        $('#--weather--cur__icon2').css("background-image", `url(${url})`);
         // $('#--weather--cur__region').html(city_name);
+
     }
 
     async function setWeather(addrcode) {
-        //addrcode 적용 후 사용
-        if(addrcode == undefined){
-            return $(".header-weather").addClass("hide");
-        }
+        console.log(addrcode)
         const city = AddrKo.getCityCoords(addrcode);
         const city_name = AddrKo.getCityName(addrcode);
+        console.log(city)
+
         const _weather = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${city[0]}&lon=${city[1]}&units=metric&lang=kr&appid=df2e0482451210d91b066313c0527bcf`);
         const weather = await _weather.json();
         const _icon = await fetch(`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`);
@@ -100,6 +125,12 @@
         $('#--weather--cur__desc').html(weather.weather[0].description);
         $('#--weather--cur__icon').css("background-image", `url(${url})`);
         $('#--weather--cur__region').html(city_name);
+
+        sessionStorage.setItem("temp", weather.main.temp);
+        sessionStorage.setItem("description", weather.weather[0].description);
+        sessionStorage.setItem("url", _icon.url);
+        sessionStorage.setItem("city_name", city_name);
+
     }
 
 </script>

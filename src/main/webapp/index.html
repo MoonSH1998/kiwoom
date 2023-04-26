@@ -6,14 +6,19 @@
     <meta http-equiv="Cache-Control" content="no-cache">
 <!--    <link rel="shortcut icon" href="images/main-logo.png">-->
     <link rel="stylesheet" type="text/css" href="css/core.css" media="only screen">
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
     <title>kiwoom</title>
 </head>
-<body style="background-color:#0E58D6">
-<div class="container d-flex flex-column gap-3" style="padding:22px">
-    <div role="button" class="btn-signup text-center" onclick="Page.go('/signup.html')">회원가입 하기</div>
-    <div role="button" class="btn-signin text-center" onclick="Page.go('/signin.html')">로그인 하기</div>
+<body style="background-color:#99ccff">
+<div class="container">
+
+    <div class="btn-index" style="margin-top:65vh" onclick="Page.go('/signup.html')">회원가입 하기</div>
+    <div class="btn-index" onclick="Page.go('/signin.html')">로그인 하기</div>
+    <div id="kakaoIdLogin" class="btn-index">
+        <div class="icon kakao"></div>
+        카카오 간편로그인
+    </div>
 </div>
+
 </body>
 </html>
 <script src="js/jquery-3.5.1.min.js"></script>
@@ -25,8 +30,6 @@
     });
 </script>
 <script src="js/velocity.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/bootstrap.bundle.js"></script>
 <script type="text/javascript">
     var pagectx = {};
     function init(params) {
@@ -41,7 +44,7 @@
 
         Page.setHandler();
 
-        // Kakao.init("");
+        Kakao.init("428a2324cf05780715fdf11b70ed2c9f");
         //카카오 로그인 할 때 사용
 
         $("#kakaoIdLogin").click(function() {
