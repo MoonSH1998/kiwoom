@@ -1,5 +1,8 @@
 var Config = {
-    url: "http://localhost:8092",
+    // url: "https://localhost:8092",
+    // url: "http://43.200.35.210:8080",
+    url: "https://kiweather.shop",
+    ip: "43.200.35.210",
     platform: null,
 
     getUserImgUrl: function(mid, file) {
@@ -7,7 +10,7 @@ var Config = {
 
         let url = "users/" + mid + "/images/" + file;
         if (this.platform !== "pc") {
-            url = "../" + url
+            // url = "../" + url
         }
         return url;
     },
@@ -23,8 +26,10 @@ let AJAX = {
     },
 
     _call: function (url, params, func, isfd, dataType) {
+        console.log(url);
         let callobj = {
             url: Config.url+"/"+url,
+            // url: Config.url+"/kiwoom/"+url,
             type: "post",
             data: params,
             dataType: dataType,
@@ -220,7 +225,7 @@ var Dialog = {
             if (i == 0) {
                 var title = (list[0].icon == "title") ? list[0].text : "선택해 주세요.";
                 //str += "<div class='title'><div class='pad-24'></div></div>";
-                str += "<div class='section pad-25 mtop-10 mbot-10'>";
+                str += "<div class='section pad-25 m-top-10 mbot-10'>";
             }
             if (list[i].icon == "title") continue;
 
@@ -229,7 +234,7 @@ var Dialog = {
             var bdtop = (cnt++ > 0) ? " bdtop-eee" : "";
 
             if (list[i].sep == true) {
-                str += "<div class='section mtop-7 mbot-7 bdtop-eee'></div>";
+                str += "<div class='section m-top-7 mbot-7 bdtop-eee'></div>";
                 bdtop = "";
             }
 
@@ -270,7 +275,7 @@ var Dialog = {
             if (i == 0) {
                 var title = (list[0].icon == "title") ? list[0].text : "선택해 주세요.";
                 //str += "<div class='title'><div class='pad-24'></div></div>";
-                str += "<div class='section pad-25 mtop-10 mbot-10'>";
+                str += "<div class='section pad-25 m-top-10 mbot-10'>";
             }
             if (list[i].icon == "title") continue;
 
@@ -591,7 +596,9 @@ let Page = {
         AJAX.call("jsp/session.jsp", null, function(data) {
             let ret = data.trim();
             let sesobj = (ret !== "NA") ? JSON.parse(ret) : {};
+            console.log(url)
             url = url.split("/").find(elem => elem.includes(".html"))
+            console.log(url)
             let param = (url == null) ? null : SessionStore.get(url);
             if (!isValid(param)) param = {};
             param.usrobj = sesobj.usrobj;
@@ -649,9 +656,9 @@ let Page = {
     _go: function(url, param, jump) {
         if (param != null) SessionStore.set(url, param);
         let platform = Config.platform;
-        if (platform === "mobile" || platform === "android") {
-            url = Config.url + "/mobile/" + url;
-        }
+        // if (platform === "mobile" || platform === "android") {
+        //     url = Config.url + "/mobile/" + url;
+        // }
 
 
         if (jump) {
@@ -985,34 +992,50 @@ let SNS = {
         });
     },
 
-    _share: function (temp,description,url,city_name) {
+    _share2: function (temp,description,icon,city_name,list) {
+        Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+                title: `오늘의 ${city_name}의 날씨`,
+                description: `온도:${temp} / 날씨:${description}`,
+                imageUrl: Config.url + "/images/main.png",
+                link: {
+                    mobileWebUrl: Config.url,
+                    webUrl: Config.url,
+                },
+            },
 
-        let content = {
-            title: `오늘 ${city_name}의 날씨를 알려드립니다.`,
-            description: `온도:${temp} / 날씨:${description}`,
-            imageUrl :Config.url + "/main.html",
-            link: {
-                webUrl: Config.url + "/main.html",
-                mobileWebUrl: Config.url + "/main.html",
-            }
-        }
+            itemContent: {
+                profileText: `오늘 ${city_name}의 추천 의류`,
+                items: [
+                    {
+                        item: '추천 1',
+                        itemOp: `${list[0]} , ${list[1]}, ${list[2]}`,
+                    },
+                    {
+                        item: '추천 2',
+                        itemOp: `${list[3]} , ${list[4]}, ${list[5]}`,
+                    },
+                    {
+                        item: '추천 3',
+                        itemOp: `${list[6]} , ${list[7]}, ${list[8]}`,
+                    },
+                ],
+            },
 
-        // let imgurl = `url(${url})`;// : "images/fox_logo_share_1.png";
-
-        // if (Config.platform !== "pc") {
-        //     imgurl = imgurl.slice(3);
-        // }
-        let feedObj = {
-            objectType: "feed",
-        };
-        content.imageUrl = url;
-        feedObj.content = content;
-
-        console.log(feedObj)
-
-        Kakao.Link.sendDefault(feedObj);
+            buttons: [
+                {
+                    title: '웹에서 더 많은 추천 보기',
+                    link: {
+                        mobileWebUrl: Config.url,
+                        webUrl: Config.url,
+                    },
+                },
+            ],
+        });
 
     },
+
 }
 
 var SSO = {
@@ -1080,8 +1103,6 @@ var SSO = {
         if(usrobj == null) return;
         var pstr = "mid=" + usrobj.mid + "&pass=" + usrobj.pass;
         this._login(pstr, function(code) {
-            alert(code);
-            alert("aa")
             if (code == "PS") {
                 Dialog.alert("비밀번호가 일치하지 않습니다.");
             } else if (code == "AD") {
@@ -1428,3 +1449,16 @@ let Utils = {
         });
     }
 };
+
+function checkAdmin(){
+    $.getJSON("https://ipgeolocation.abstractapi.com/v1/?api_key=9b196f5dd3d3495ab9f64ef501104e30", function(data) {
+        console.log(data.ip_address);
+        var ip_add = data.ip_address;
+        if(Config.ip == ip_add){
+            return 1;
+        }else{
+            return 0;
+        }
+    })
+}
+

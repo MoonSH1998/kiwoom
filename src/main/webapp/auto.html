@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=0, viewport-fit=cover">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/core.css" media="only screen">
+    <title>kiwoom</title>
+<!--    mx-auto-->
+<!--    col-4-->
+<!--    -->
+</head>
+<body style="background-color: #fff;">
+<div>asd</div>
+</body>
+</html>
+<script src="js/jquery-3.5.1.min.js"></script>
+<script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+<script src="js/core.js"></script>
+<script src="js/image.js"></script>
+<script src="js/clothes.js"></script>
+<script src="js/addr.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        Page.init(location.pathname, init, {nolog: true});
+    });
+</script>
+<script src="js/velocity.min.js"></script>
+<script type="text/javascript">
+    var pagectx = {};
+    function init(params) {
+        // for(var i=0;i<1; i++){
+
+        if(checkAdmin() == 1){
+            for(var i=0;i<AddrKo.cities[i].code.length; i++){
+                let code = AddrKo.cities[i].code;
+                setWeather(code);
+            }
+        };
+
+    }
+
+    async function setWeather(addrcode) {
+        const city = AddrKo.getCityCoords(addrcode);
+        const city_name = AddrKo.getCityName(addrcode);
+        const _weather = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${city[0]}&lon=${city[1]}&units=metric&lang=kr&appid=df2e0482451210d91b066313c0527bcf`);
+        const weather = await _weather.json();
+        recommendClo(weather.main.temp, 'f', addrcode, weather.weather[0].description);
+        recommendClo(weather.main.temp, 'm', addrcode, weather.weather[0].description);
+
+    }
+
+    function recommendClo(temp, gender, addrcode, description){
+        var temp1 = Math.round(temp)
+
+        var rec_ = Clothes.getRecommend(temp1);
+
+        if(gender=='f'){
+            var not = Clothes.notWoman[0].code;
+        }else {
+            var not = Clothes.notMan[0].code;
+        }
+
+
+        let recTopList1 = rec_.code1.split(",").filter(x => !not.includes(x));
+        let recBottomList1 = rec_.code2.split(",").filter(x => !not.includes(x));
+        let recOuterList1 = rec_.code3.split(",").filter(x => !not.includes(x));
+
+
+        var rec = [];
+        var rec_ = "";
+        while (true) {
+            var tempNum1 = Math.floor(Math.random() * recTopList1.length);
+            var tempNum2 = Math.floor(Math.random() * recBottomList1.length);
+            var tempNum3 = Math.floor(Math.random() * recOuterList1.length);
+
+            var tempVal1 = recTopList1[tempNum1];
+            var notMatch = [Clothes.getTop(tempVal1)?.notMatch.split(",")];
+
+
+            var tempVal2 = recBottomList1[tempNum2];
+            while(notMatch[0].includes(tempVal2)){
+                tempNum2 = Math.floor(Math.random() * recBottomList1.length);
+                tempVal2 = recBottomList1[tempNum2];
+            }
+
+            var tempVal3 = recOuterList1[tempNum3];
+            while(notMatch[0].includes(tempVal3) && tempVal3 !=null){
+                tempNum3 = Math.floor(Math.random() * recOuterList1.length);
+                tempVal3 = recOuterList1[tempNum3];
+            }
+
+
+            rec.push(`${tempVal1}:${Clothes.getCloName(tempVal1)}`)
+            rec.push(`${tempVal2}:${Clothes.getCloName(tempVal2)}`)
+            rec.push(`${tempVal3}:${Clothes.getCloName(tempVal3)}`)
+
+            rec_ += (`${tempVal1}:${Clothes.getCloName(tempVal1)},`)
+            rec_ += (`${tempVal2}:${Clothes.getCloName(tempVal2)},`)
+            if(Clothes.getCloName(tempVal3) == null){
+                rec_ += (`99:x,`)
+            }else{
+                rec_ += (`${tempVal3}:${Clothes.getCloName(tempVal3)},`)
+            }
+
+
+            if(rec.length ==9){
+                break;
+            }
+        }
+
+        // 혅재 addrcode에 대한 의류 추천
+        var obj = {
+            rec: rec_,
+            gender: gender,
+            city_name: AddrKo.getCityName(addrcode),
+            desc: description,
+            temp: temp,
+        };
+        var jsonArray = JSON.stringify(obj)
+        AJAX.call("jsp/sendRec.jsp", {addrcode:addrcode, jsonArray:jsonArray}, function(data) {
+
+        });
+        console.log(addrcode)
+        console.log(rec_)
+
+    }
+
+</script>

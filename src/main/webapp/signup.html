@@ -10,16 +10,29 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
     <title>kiwoom</title>
 </head>
-<body>
-<div class="container d-flex flex-column justify-content-between">
-    <div id="schoolSearch">
-        <div class="back-icon" role="button" onclick="Page.back()"></div>
-        <div class="signup-title fs-24" style="margin-top:58px">회원가입</div>
+<body style="background-color: white;">
+<div class="header m-top-30">
+    <div class="back-icon" role="button" style="margin-top: 0;position: absolute;left: 5%;" onclick="Page.back()"></div>
+    <div class="signup-title fs-24">회원가입</div>
+</div>
 
-        <div id="signupForm"><input name="id" class="signup-box w-100" type="text" placeholder="아이디(이메일)" style="outline:none" />
-            <input name="pw" class="signup-box w-100" type="password" placeholder="비밀번호" style="outline:none" />
-            <input name="pw2" class="signup-box w-100" type="password" placeholder="비밀번호 확인" style="outline:none" />
-            <div class="signup-box fs-18 text-center" onclick='signup()' style="margin-top:100px">회원가입</div>
+
+<div class="container d-flex flex-column justify-content-between">
+    <div id="signup">
+        <div id="signupForm" class="dflex m-top-0">
+            <input name="id" class="indexBox2 " type="text" placeholder="아이디(이메일)" style="outline:none" />
+            <div class="form-desc small m-top-10 m-bottom-20 fs-14" style="padding: 0px 7%;width: 86%;">
+                이메일 주소를 정확하게 입력해주세요. <b>입력하신 주소로 인증번호가 전송</b>됩니다.
+            </div>
+            <input name="pw" class="indexBox2" type="password" placeholder="비밀번호" style="outline:none" />
+            <input name="pw2" class="indexBox2" type="password" placeholder="비밀번호 확인" style="outline:none" />
+            <div class="indexBox m-top-20" onclick='signup()'>회원가입</div>
+
+            <div class="form-desc small2 m-top-15 fs-14"style="padding: 0px 7%;width: 86%;">
+                회원 가입을 하실 경우 <a href="#" onclick="Page.go('termCust.html')" class='blue'>kiwoom 약관</a>에 동의하며,
+                쿠키 사용을 포함한 <a href="#" onclick="Page.go('termCust.html')" class='blue'>데이터 정책</a>을 읽고 이해하신 것으로 간주됩니다.
+            </div>
+
         </div>
     </div>
 
@@ -28,9 +41,6 @@
 </html>
 <script src="js/jquery-3.5.1.min.js"></script>
 <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
-<script src="js/bootstrap.bundle.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/bootstrap.bundle.js"></script>
 <script src="js/core.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
@@ -42,10 +52,14 @@
     var pagectx = {};
     function init(params) {
         pagectx = params;
+        $('input[name=id]').focus();
     }
 
 
     function signup(){
+        if (pagectx.onproc == true) return;
+        pagectx.onproc = true;
+
         let id = $('input[name=id]').val().trim();
         let pw = $('input[name=pw]').val().trim();
         let pw2 = $('input[name=pw2]').val().trim();
@@ -82,7 +96,6 @@
         }
 
         let jsonForm = {id : id, pw : pw, pw2 : pw2};
-        console.log(jsonForm);
 
         AJAX.call("jsp/signup.jsp", jsonForm, function (data) {
             pagectx.onproc = false;
@@ -103,4 +116,22 @@
         //     Dialog.alert('회원가입이 완료되었습니다.',Page.go('/index.html'));
         // });
     }
+
+    $('input[name=id]').keypress(function (e) {
+        if (e.keyCode === 13) {
+            $('input[name=pw]').focus();
+        }
+    })
+    $('input[name=pw]').keypress(function (e) {
+        if (e.keyCode === 13) {
+            $('input[name=pw2]').focus();
+        }
+    })
+
+    $('input[name=pw2]').keypress(function (e) {
+        if (e.keyCode === 13) {
+            signup();
+        }
+    })
+
 </script>

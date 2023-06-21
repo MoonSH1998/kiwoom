@@ -1,7 +1,9 @@
 package core;
 
+import org.json.simple.JSONArray;
 import util.ConnectionPool;
 import util.MD5;
+import util.Mail;
 import util.SqlUtil;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -35,11 +37,11 @@ public class UserDAO {
                     "', '" + MD5.get(pass) +
                     "', '" + jsonobj.toJSONString() +
                     "')";
-            System.out.println(sql);
             SqlUtil.update(sql);
 
             // create a directory to store images
             (new File(imgdir)).mkdirs();
+
             return jsonobj;
             }
         finally {
@@ -50,8 +52,17 @@ public class UserDAO {
 
     }
 
-
-
+    public String searchId(String name, String gender, String birth, String tel, String email) throws NamingException, SQLException, ParseException {
+        String sql = "select mid from user where JSON_EXTRACT(jsonstr,'$.name') = '" + name + "'";
+        sql += "and JSON_EXTRACT(jsonstr,'$.gender') = '" + gender + "'";
+        sql += "and JSON_EXTRACT(jsonstr,'$.birth') = '" + birth + "'";
+        sql += "and JSON_EXTRACT(jsonstr,'$.tel') = '" + tel +"'";
+        if(email != null){
+            sql += "and mid = '" + email + "' ";
+        }
+        sql += " and mid like '%@%'";
+        return SqlUtil.query(sql);
+    }
 
     // Invoked from login.jsp
     public String login(String mid, String pass) throws NamingException, SQLException, ParseException {
@@ -184,7 +195,65 @@ public class UserDAO {
         }
     }
 
+    public void getUserToRec(String addrcode, String jsonArray) throws NamingException, SQLException, ParseException {
+        Connection conn = ConnectionPool.get();
+        Statement st = null;
+        ResultSet rs = null;
+        ResultSet rs1 = null;
+        try {
+            org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
+            JSONObject jsonObj = (JSONObject) parser.parse(jsonArray);
 
+//            String sql = "SELECT mid FROM user WHERE addrcode = '" + addrcode + "' ";
+//            sql += " and JSON_EXTRACT(jsonstr,'$.permission') = '1' and JSON_EXTRACT(jsonstr,'$.gender') = '" + jsonObj.get("gender") +"'";
+
+
+            String sql = "SELECT mid, JSON_EXTRACT(jsonstr,'$.name') FROM user WHERE addrcode = '" + addrcode +"' and JSON_EXTRACT(jsonstr,'$.permission') = '1' and JSON_EXTRACT(jsonstr,'$.gender') = '" + jsonObj.get("gender") +"'";
+            System.out.println((sql));
+            st = conn.createStatement();
+            rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                System.out.println(rs.getString(1));
+                String mid = rs.getString(1);
+                String name = rs.getString(2);
+
+                Mail mail = new Mail();
+
+                mail.sendRec(mid, jsonArray, name);
+
+            }
+
+
+//            if(rs.next()) {
+//                while(rs.next()){
+//                    System.out.println(rs.getString("mid"));
+//                }
+//
+////                sql = "update passcode set wrong = wrong+1 WHERE mid = '" + mid + "' ";
+////                SqlUtil.update(sql);
+////                sql = "SELECT wrong FROM passcode WHERE mid = '" + mid + "'";
+////                stmt = conn.prepareStatement(sql);
+////                rs1 = stmt.executeQuery();
+////                if (rs1.next()) {
+////                    return rs1.getInt(1);
+////                }
+//            }
+//            System.out.println("aa");
+////            return 200;
+
+        } finally {
+//            if (rs != null) rs.close();
+//            if (st != null) st.close();
+//            if (conn != null) conn.close();
+        }
+    }
+
+
+    public String mailUserSearch() throws NamingException, SQLException, ParseException {
+        String sql = "select addrcode from user where JSON_EXTRACT(jsonstr,'$.permission') = '1' group by addrcode";
+        return SqlUtil.queryList2(sql);
+    }
 
 
 }

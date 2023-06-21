@@ -4,7 +4,6 @@
     <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=0, viewport-fit=cover">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="Cache-Control" content="no-cache">
-    <!--    <link rel="shortcut icon" href="images/main-logo.png">-->
     <link rel="stylesheet" type="text/css" href="/css/core.css" media="only screen">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -12,15 +11,18 @@
 </head>
 <body>
 
-<div class="container d-flex flex-column justify-content-between">
-    <div id="schoolSearch">
-        <div class="back-icon" role="button" onclick="Page.back()"></div>
+<div class="container d-flex">
+    <div id="signup" class="dflex">
+        <div class="back-icon"  onclick="Page.back()"></div>
         <div class="signup-title fs-24" style="margin-top:58px">회원가입</div>
 
-        <input id="--mid" type="text" placeholder="아이디를 입력해주세요">
-        <input id="--pass" type="password" placeholder="비밀번호를 입력해주세요">
-        <div class="button" onclick="login()">로그인</div>
-        <div class="button" onclick="signup()">회원가입</div>
+        <div id="signupForm" class="dflex" style="width: inherit;">
+            <input id="--mid" type="text" class="inputLightcoral" placeholder="아이디를 입력해주세요">
+            <input id="--pass" type="password" class="inputLightcoral" placeholder="비밀번호를 입력해주세요">
+            <div class="inputLightcoral" onclick="login()">로그인</div>
+            <div class="inputLightcoral" onclick="signup()">회원가입</div>
+        </div>
+
     </div>
 
 
@@ -54,9 +56,6 @@
         setPage();
 
         Page.setHandler();
-
-        // Kakao.init("");
-        //카카오 로그인 할 때 사용
 
         $("#kakaoIdLogin").click(function() {
             login("kakao");

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=0, viewport-fit=cover">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="css/core.css" media="only screen">
+    <title>Kiwoom</title>
+    <style>
+        html{
+            background-color: white;
+        }
+        body{
+            background-color: white;
+        }
+        .page-hdr {
+            z-index: 100;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 7.266vh;
+            display: flex;
+            align-items: center;
+            padding: 0 25px;
+            //padding-top: constant(safe-area-inset-top);
+            /* padding-top: env(safe-area-inset-top); */
+            background-color: white;
+            border-bottom: 1px solid #f3f3f3;
+        }
+        .page-hdr .btn-back {
+            width: 5.4vw;
+            height: 5.4vw;
+            background-repeat: no-repeat;
+            background-position: 50%;
+            background-size: contain;
+            cursor: pointer;
+            background-image: url(images/back-icon.svg);
+        }
+        .page-hdr .title {
+            max-width: 64vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-left: 10px;
+            font-weight: 600;
+            font-family: "GyeonggiTitle";
+        }
+    </style>
+</head>
+<body>
+<div class="page-hdr">
+    <div class="btn-back" onclick="Page.back()"></div>
+    <div class="title">ID 찾기</div>
+</div>
+<div class="page-body" style="padding: 25px; margin-top: 14.6vw;">
+
+    <div id='--dialog' class='dialog'><div class='wrapper'>
+        <div id='--dialog-del' class='del-btn hide' onclick='Dialog.reset()'></div>
+        <div id='--dialog-cnt' class='contents'></div>
+    </div></div>
+
+
+            <div class="idpw page-cap m-top-50">프로필 정보를 아래 서식에 맞게 입력해주세요.</div>
+            <div class="m-top-20">
+                <div class="edit-box bdtop">
+                    <div class="text">성별</div>
+                    <select id="--gender">
+                        <option value="none" style="color:#999">성별을 선택해주세요.</option>
+                        <option value="m">남성</option>
+                        <option value="f">여성</option>
+                    </select>
+                </div>
+                <div class="edit-box bdtop">
+                    <div class="text">생년월일</div>
+                    <input id="--birth" class="input user" type="date">
+                </div>
+                <div class="edit-box bdtop">
+                    <div class="text">이름</div>
+                    <input id="--name" class="input user" type="text" placeholder="이름 (닉네임)">
+                    <div class="icon pen hide" onclick="setFocus('#--name')"></div>
+                </div>
+                <div class="edit-box bdtop bdbot">
+                    <div class="text">핸드폰</div>
+                    <input id="--tel" class="input user" type="text" placeholder="휴대폰 번호">
+                    <div class="icon pen hide" onclick="setFocus('#--tel')"></div>
+                </div>
+            </div>
+
+
+
+            <div class="indexBox button small m-top-20 mbot-20" onclick="upload()">ID 조회</div>
+        </div>
+</div>
+<div class="page-footer"></div>
+</body>
+</html>
+<script src="../js/jquery-3.5.1.min.js"></script>
+<script src="../js/core.js"></script>
+<script type="text/javascript">
+</script>
+<script src="../js/velocity.min.js"></script>
+<script src="../js/feed.js"></script>
+<script src="../js/addr.js"></script>
+<script src="../js/image.js"></script>
+<script type="text/javascript">
+
+    function setFocus(view) {
+        $(view).focus();
+        $(view).addClass("bdr-bot");
+    };
+
+
+    function save(cbfunc) {
+        var usrobj = getObj();
+        console.log(usrobj);
+
+        var params = new FormData();
+        params.append("usrobj", JSON.stringify(usrobj));
+        AJAX.call("jsp/idSearch.jsp", {name:usrobj.name, gender:usrobj.gender,birth:usrobj.birth,tel:usrobj.tel}, function(data) {
+            if(data.trim() === "null"){
+                Dialog.alert("입력하신 정보에 해당하는 ID가 없습니다.");
+            }else{
+                Dialog.alert("ID: " + data.trim());
+            }
+        });
+    };
+
+    function upload() {
+        if (!checkInput()) return;
+
+        save(function() {
+            Dialog.alert("프로필 업데이트가 완료되었습니다.", function() {
+                // Page.back();
+                // 프로필 편집 후 세션 초기화 (작성된 글 변경이 늦음) by Moon 0315
+                // sessionStorage.clear();
+                // 주소 변경 후 프로필 업데이트 시 다시 주소 창으로 가는 것을 막음 by Moon 0307
+                // Page.go("main.html");
+            });
+        });
+    };
+
+    function checkInput() {
+        var gender = $("#--gender").val();
+        if (gender == "none") {
+            Dialog.alert("성별을 선택해주세요.", function() { $("#--gender").focus() });
+            return false;
+        };
+
+        var birth = $("#--birth").val().trim();
+        if (birth == "") {
+            Dialog.alert("성년월일을 입력해 주세요.", function() { $("#--birth").focus() });
+            return false;
+        };
+
+        var name = $("#--name").val().trim();
+        if (name == "") {
+            Dialog.alert("이름(닉네임)을 입력해 주세요.", function() { $("#--name").focus() });
+            return false;
+        };
+
+        var tel = $("#--tel").val().trim();
+        if (tel == "") {
+            Dialog.alert("휴대폰 정보를 입력해 주세요.", function() { $("#--tel").focus() });
+            return false;
+        };
+
+        if (!PhoneNum.check(tel)) {
+            Dialog.alert("휴대폰 번호를 양식에 맞게 입력해 주세요. (예. 010-xxxx-xxxx)", function() { $("#--tel").focus() });
+            return false;
+        };
+
+        return true;
+    };
+
+    function getObj() {
+        var gender = $("#--gender").val();
+        var birth = $("#--birth").val().trim();
+        var name = $("#--name").val().trim();
+
+        var usrobj = {
+            name: name, gender: gender, birth: birth,
+            };
+
+        var tel = $("#--tel").val().trim();
+        if (tel != "") usrobj.tel = tel;
+
+        return usrobj;
+    };
+
+</script>

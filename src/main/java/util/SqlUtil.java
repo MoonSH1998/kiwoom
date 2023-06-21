@@ -71,6 +71,29 @@ public class SqlUtil {
 			if (rs != null) rs.close();
 		}
 	}
+	public static String queryList2(String sql) throws NamingException, SQLException {
+		Connection conn = null;
+		Statement st = null;
+		ResultSet rs = null;
+		try {
+			conn = ConnectionPool.get();
+			st = conn.createStatement();
+			rs = st.executeQuery(sql);
+
+			String list = "";
+			int cnt = 0;
+			while (rs.next()) {
+				if (cnt++ > 0) list += ",";
+				list += rs.getString(1);
+			}
+			return "" + list + "";
+
+		} finally {
+			if (conn != null) conn.close();
+			if (st != null) st.close();
+			if (rs != null) rs.close();
+		}
+	}
 
 	public static int queryInt(String sql) throws NamingException, SQLException {
 		String res = query(sql);

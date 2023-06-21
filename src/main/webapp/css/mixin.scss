@@ -1,0 +1,97 @@
+@mixin displayFlex($col: false, $jc: null, $ai: null) {
+  display: flex;
+  @if ($col) {
+    flex-direction: column;
+  }
+
+  @if($jc != null) {
+    justify-content: $jc;
+  }
+
+  @if($ai != null) {
+    align-items: $ai;
+  }
+}
+
+@mixin backgroundImage($url:null, $size:null, $position:null) {
+  background-repeat: no-repeat;
+
+  @if ($url != null) {
+    $urls: str-split($url, ".");
+    @if(last($urls) == "svg") {
+      background-image: url("../images/svg/" + $url);
+    } @else {
+      background-image: url("../images/" + $url);
+    }
+}
+
+
+  @if($size == null) {
+    background-size: 50%;
+  } @else {
+    background-size: $size;
+  }
+
+  @if($position == null) {
+    background-position: 50%;
+  } @else {
+    background-position: $position;
+  }
+}
+
+@mixin size($width: null, $height: null) {
+  @if($width != null) {
+    width: $width;
+  }
+
+  @if($height != null) {
+    height: $height;
+  }
+}
+
+@mixin setFont($size: null, $weight: null, $color: null) {
+  @if($size != null) {
+    font-size: $size;
+  }
+
+  @if($weight != null) {
+    font-weight: $weight;
+  }
+
+  @if($color != null) {
+    color: $color;
+  }
+}
+
+@mixin lineClamp($line) {
+  display: -webkit-box;
+  -webkit-line-clamp: $line;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: keep-all;
+}
+
+
+
+@function str-split($string, $separator: ",") {
+  $split-list: ();
+  $index: str-index($string, $separator);
+
+  @while $index != null {
+    $item: str-slice($string, 1, $index - 1);
+    $split-list: append($split-list, $item);
+    $string: str-slice($string, $index + 1);
+    $index: str-index($string, $separator);
+  }
+
+  @return append($split-list, $string);
+}
+
+@function first($list) {
+  @return nth($list, 1);
+}
+
+@function last($list) {
+  @return nth($list, length($list));
+}
+

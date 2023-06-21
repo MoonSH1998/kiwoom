@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 public class MD5 {
     public static String get(String input) {
         try {
-            System.out.println("input = " +input);
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md.digest(input.getBytes());
             BigInteger number = new BigInteger(1, messageDigest);

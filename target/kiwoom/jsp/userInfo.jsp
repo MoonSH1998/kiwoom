@@ -39,17 +39,25 @@
 					sesup = false;
 				}
 			} else {
-//				if(name.equals("image")) {
-//					String root = application.getRealPath(File.separator);
-//					String file = Util.stripSpecialChar(Util.getFilename(item.getName()));
-//					if (file != null) {
-//						Util.saveImage(root, mid, file, item.get());
-//						usrobj.put("image", file);
-//					}
-//					System.out.println(name + ": " + file);
-//				}
+				try{
+					if(name.equals("image")) {
+						String root = application.getRealPath(File.separator);
+						String file = Util.stripSpecialChar(Util.getFilename(item.getName()));
+
+						if (file != null) {
+							Util.saveImage(root, mid, file, item.get());
+							usrobj.put("image", file);
+							System.out.println(file);
+						}
+						System.out.println(name + ": " + file);
+					}
+				}catch (Exception ex){
+					ex.printStackTrace();
+				}
+
 			}
 		}
+
 
 		JSONObject addrobj = (JSONObject) usrobj.get("addrobj");
 		Object pass = usrobj.get("pass");

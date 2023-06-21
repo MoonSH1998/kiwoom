@@ -5,9 +5,11 @@
     <meta http-equiv="Cache-Control" content="no-cache">
     <!--    <link rel="shortcut icon" href="images/main-logo.png">-->
     <link rel="stylesheet" type="text/css" href="css/core.css" media="only screen">
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
     <title>kiwoom</title>
 <style>
+    body{
+        background-color: #fff;
+    }
     li{
         margin-right: 10px;
     }
@@ -16,25 +18,29 @@
 }
 </style>
 </head>
-<body style="background-color:#0E58D6">
-<div class="container d-flex flex-column gap-3" style="padding:22px">
-    <header class="header">
-        <div class="d-flex align-items-center" >
-            <div class="back-icon mx-auto" role="button" onclick="Page.back()"></div>
-            <div class=" mx-auto">내 정보 수정</div>
-            <div class="btn-text mx-auto" onclick="upload()">저장</div>
-        </div>
-    </header>
-    <div id="--file-photo" class="profileImg" style="width:25px;height: 25px;radius:50%;background-color: red;"></div>
+<body>
+<div class="userInfoHeader" >
+    <div class="back-icon m-top-0 " role="button" onclick="Page.back()"></div>
+    <div class=" title fs-20">내 정보 수정</div>
+    <div class="btn-text" onclick="upload()">저장</div>
+</div>
 
+<div class="container d-flex flex-column gap-3" style="padding:22px; align-items: center; justify-content: center;">
 
-    <div class="page-body">
-        <div class="vframe-3">
-            <div class="user-info-pane-title">기본 정보</div>
-            <div class="section"><div class="section pad-20 ">
+    <div id="--photo" class="photo">
+        <div class="edit" onclick="openImage()"></div>
+        <input id="--file-photo" type="file" style="display:none">
+    </div>
+<!--    <div id="&#45;&#45;file-photo" class="&#45;&#45;file-photo userinfoPhoto" onclick="openImage()"></div>-->
 
+    <div class="page-body" style="width: 100%; margin-bottom: 30px;">
+
+        <div class="userName m-top-20">이름을 설정해주세요.</div>
+        <div class="userCity"></div>
+
+        <div class="user-info-pane-title m-top-20">기본 정보</div>
+            <div class="section">
                 <div class="edit-box">
-                    <div class="icon gender hide"></div>
                     <div class="text">성별</div>
                     <select id="--gender">
                         <option value="none" style="color:#999">성별을 선택해주세요.</option>
@@ -44,49 +50,20 @@
                 </div>
 
                 <div class="edit-box">
-                    <div class="icon name hide"></div>
                     <div class="text">이름</div>
                     <input id="--name" type="text" placeholder="이름 (닉네임)">
                     <div class="icon pen hide" onclick="setFocus('#--name')"></div>
                 </div>
-
-                <div class="edit-box ">
-                    <div class="text">연령대</div>
-                    <div style="display: flex;">
-                        <div class="checks">
-                            <input type="radio" id="age1" name="age">
-                            <label for="age1">10대</label>
-                        </div>
-                        <div class="checks">
-                            <input type="radio" id="age2" name="age">
-                            <label for="age2">20대</label>
-                        </div>
-                        <div class="checks">
-                            <input type="radio" id="age3" name="age">
-                            <label for="age3">30대</label>
-                        </div>
-                        <div class="checks">
-                            <input type="radio" id="age4" name="age">
-                            <label for="age4">40대</label>
-                        </div>
-                        <div class="checks">
-                            <input type="radio" id="age5" name="age">
-                            <label for="age5">50대</label>
-                        </div>
-                        <div class="checks">
-                            <input type="radio" id="age6" name="age">
-                            <label for="age6">60대</label>
-                        </div>
-                    </div>
-
+                <div class="edit-box">
+                    <div class="text">생년월일</div>
+                    <input id="--birth" type="date" placeholder="이름 (닉네임)">
+                    <div class="icon pen hide" onclick="setFocus('#--name')"></div>
                 </div>
-
-            </div></div>
+            </div>
 
             <div class="user-info-pane-title" style="margin-top: 32px;">연락처 정보</div>
-            <div class="section"><div class="section pad-25 ">
+            <div class="section">
                 <div class="edit-box ">
-                    <div class="icon phone hide"></div>
                     <div class="text">핸드폰</div>
                     <input id="--tel" type="text" placeholder="휴대폰 번호">
                     <div class="icon pen hide" onclick="setFocus('#--tel')"></div>
@@ -97,6 +74,18 @@
                     <input id="--email" type="text" readonly>
                     <div class="icon pen hide" onclick="setFocus('#--email')"></div>
                 </div>
+
+                <div class="edit-box">
+                    <div class="icon email hide"></div>
+                    <div class="text permission">이메일 자동 발신 동의</div>
+                    <div class="permission" style="display: flex;">
+                        <span>동의</span><div class='check1 0'><input type='checkbox' name='accept' value='accept1' /></div>
+                        <span>비동의</span><div class='check1 1'><input type='checkbox' name='accept' value='accept2' /></div>
+                    </div>
+
+                    <div class="icon pen hide" onclick="setFocus('#--email')"></div>
+                </div>
+
                 <div class="edit-box">
                     <div class="icon addr hide"></div>
                     <div class="text">주소</div>
@@ -104,15 +93,11 @@
                     <div class="icon pen hide" onclick="setAddr()"></div>
                 </div>
             </div>
-            </div>
 
         </div>
     </div>
-</div>
 </body>
 </html>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/bootstrap.bundle.js"></script>
 <script src="../js/jquery-3.5.1.min.js"></script>
 <script src="../js/core.js"></script>
 <script type="text/javascript">
@@ -120,9 +105,6 @@ $(document).ready(function() {
     Page.init("userInfo.html", init);
 });
 </script>
-<script src="js/bootstrap.bundle.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/bootstrap.bundle.js"></script>
 <script src="../js/velocity.min.js"></script>
 <script src="../js/addr.js"></script>
 <script src="../js/image.js"></script>
@@ -138,9 +120,8 @@ function init(params) {
 
 function setPage(usrobj) {
     console.log(usrobj);
-
     ImageUploader.init("--file-photo", "--photo", cbOpenFace);
-    
+
     if (usrobj.image != null) {
         var imgurl = Config.getUserImgUrl(usrobj.mid, usrobj.image);
         $("#--photo").css("background-image", "url('../" + imgurl + "')");
@@ -149,27 +130,21 @@ function setPage(usrobj) {
     if (usrobj.gender != null) {
         $("#--gender").val(usrobj.gender).prop("selected", true);
     }
-    if (usrobj.intro != null) $("#--intro").val(usrobj.intro);
 
-    //keyword
-    if (isValid(usrobj.keyword)) {
-        var keyword = usrobj.keyword.split(" ");
-        var str = "";
-        for(var i=0; i<keyword.length; i++) {
-            var k = keyword[i];
-            if(k.trim() != "")
-            str += getTagCode(k.replace(/#/g, ""));
-        }
-        $(".hash-list").html(str);
-        // $("#--hashtag").val(usrobj.keyword);
+    if (usrobj.name != null) {
+        $("#--name").val(usrobj.name);
+        $(".userName").text(usrobj.name);
     }
 
-
-
-    if (usrobj.name != null) $("#--name").val(usrobj.name);
-    if (usrobj.age != null) {
-        $(`input[id=${usrobj.age}]`).click()
+    if(usrobj.birth != null){
+        $("#--birth").val(usrobj.birth);
     }
+
+    if (usrobj.name != null) $(".userName").val(usrobj.name);
+
+    var cityName= AddrKo.getCityName(pagectx.addrcode).split(" ");
+    $(".userCity").text(cityName[0] + " " + cityName[1]);
+
     if (usrobj.tel != null) $("#--tel").val(usrobj.tel);
 
     $("#--email").val(usrobj.mid);
@@ -189,6 +164,16 @@ function setPage(usrobj) {
         $("#--city").val(city + " " + usrobj.addrobj.street);
     }
 
+    if (usrobj?.permission != null) {
+        if(usrobj?.permission == "1"){
+            $($($(".check1 > input"))[0]).click()
+        }
+        else{
+            $($($(".check1 > input"))[1]).click()
+        }
+    }else{
+        $($($(".check1 > input"))[1]).click()
+    }
 
     Page.setHandler();
 }
@@ -254,10 +239,11 @@ function checkInput() {
             return false;
         };
 
-        if($('input[name="age"]:checked').length == 0){
-            Dialog.alert("연령대를 선택해주세요.");
-            return false;
-        }
+        var birth = $("#--birth").val();
+        //if(birth.length == 0){
+        //     Dialog.alert("연령대를 선택해주세요.");
+        //     return false;
+        // }
 
         var tel = $("#--tel").val().trim();
         if (tel == "") {
@@ -301,34 +287,24 @@ function checkInput() {
 }
 
 function getObj() {
-    var intro = $("#--intro").val();
 
     var name = $("#--name").val().trim();
 
-    var age = $('input[name="age"]:checked')[0].id
+    var birth = $('#--birth').val();
 
     var gender = $("#--gender").val();
 
-    // var street = $("#--street").val().trim();
+    var tel = $("#--tel").val();
 
     var usrobj = pagectx.usrobj;
+
+    usrobj.name = name;
+    usrobj.birth = birth;
+    usrobj.gender = gender;
+    usrobj.tel = tel;
+
     console.log(usrobj)
 
-    var keyword = ""; // $("#--hashtag").val().trim();
-    $(".hash-list li").each(function(idx, el) {
-        keyword += $(this).text() + " ";
-    });
-    usrobj.keyword = keyword;
-
-    usrobj.intro = intro;
-    usrobj.name = name;
-    // usrobj.street = street;
-    if(usrobj.type != "A"){
-        usrobj.age = age;
-        usrobj.gender= gender;
-        var tel = $("#--tel").val().trim();
-        if (tel != "") usrobj.tel = tel;
-    }
 
     if (pagectx.usrobj.image != null) { // keep the existing image file info
         usrobj.image = pagectx.usrobj.image;
@@ -338,6 +314,12 @@ function getObj() {
     if (pagectx.usrobj.addrobj != null) { // keep the existing user address info
         usrobj.addrobj = pagectx.usrobj.addrobj;
     };
+
+    if($($($(".check1"))[0]).hasClass("sel")){
+        usrobj.permission = "1";
+    }else{
+        usrobj.permission = "0";
+    }
 
     return usrobj;
 };
@@ -377,4 +359,16 @@ function getTagCode(value) {
 function removeTag(id) {
     $("#"+id).remove();
 }
+$(".check1").click(function(e){
+    var i = e.currentTarget.classList[1];
+    $($(".check1 > input")).prop("checked",false)
+    $($(".check1")).removeClass("sel")
+    $($(`.check1 > input`)[i]).prop("checked",true)
+    $($(`.check1`)[i]).addClass("sel")
+
+
+    // $('input:checkbox').prop('checked',function(){
+    //     return !$(this).prop('checked');
+    // });
+});
 </script>

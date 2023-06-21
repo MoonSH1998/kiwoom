@@ -11,3 +11,10 @@ CREATE TABLE IF NOT EXISTS user (
     jsonstr VARCHAR(1024),
     ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS passcode(
+    mid VARCHAR(128) PRIMARY KEY ,
+    pwcode VARCHAR(16),
+    wrong INT(16) UNSIGNED,
+    INDEX idx1(mid)
+    );

@@ -10,16 +10,18 @@ var ImageUploader = {
 
     open: function (fileview, imgview, cbfunc) {
         // SHKIM 20190325
+
         var cfgDevice = SessionStore.get("cfgDevice");
-        
+
+        document.getElementById(fileview).click();
         // native app
-        if(isValid(cfgDevice) && cfgDevice.platform == "android") {
-            document.getElementById(fileview).click();
-        }
-        // browser
-        else {
-            document.getElementById(fileview).click();
-        }
+        // if(isValid(cfgDevice) && cfgDevice.platform == "android") {
+        //     document.getElementById(fileview).click();
+        // }
+        // // browser
+        // else {
+        //     document.getElementById(fileview).click();
+        // }
     },
     
     appendParams: function (params, name, file, filename) {
@@ -220,11 +222,11 @@ var ImageUploader2 = {
         // 모바일 글 작성 이미지 추가 시 x표시 url 수정 by Moon 0308
         var thisUrl = window.location.pathname
         // add a remove button with index
-        if(thisUrl.includes("/mobile/")){
-            var str = "<div class='icon' style='background-image: url(\"../images/svg/ico_del.svg\")'  onclick='ImageUploader2._removeImage(" + index + ");'></div>";
-        }else{
+        // if(thisUrl.includes("/mobile/")){
+        //     var str = "<div class='icon' style='background-image: url(\"../images/svg/ico_del.svg\")'  onclick='ImageUploader2._removeImage(" + index + ");'></div>";
+        // }else{
             var str = "<div class='icon' style='background-image: url(\"images/svg/ico_del.svg\")'  onclick='ImageUploader2._removeImage(" + index + ");'></div>";
-        }
+        // }
         $("#--photo-pane-" + index).append(str);
     },
     

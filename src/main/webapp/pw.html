@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name=viewport content="width=device-width, initial-scale=1, user-scalable=0, viewport-fit=cover">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="css/core.css" media="only screen">
+    <title>Kiwoom</title>
+    <style>
+        html{
+            background-color: white;
+        }
+        body{
+            background-color: white;
+        }
+        .page-hdr {
+            z-index: 100;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 7.266vh;
+            display: flex;
+            align-items: center;
+            padding: 0 25px;
+        //padding-top: constant(safe-area-inset-top);
+            /* padding-top: env(safe-area-inset-top); */
+            background-color: white;
+            border-bottom: 1px solid #f3f3f3;
+        }
+        .page-hdr .btn-back {
+            width: 5.4vw;
+            height: 5.4vw;
+            background-repeat: no-repeat;
+            background-position: 50%;
+            background-size: contain;
+            cursor: pointer;
+            background-image: url(images/back-icon.svg);
+        }
+        .page-hdr .title {
+            max-width: 64vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-left: 10px;
+            font-weight: 600;
+            font-family: "GyeonggiTitle";
+        }
+    </style>
+</head>
+<body>
+<div class="page-hdr">
+    <div class="btn-back" onclick="Page.back()"></div>
+    <div class="title">PW 찾기</div>
+</div>
+<div class="page-body" style="padding: 25px; margin-top: 14.6vw;">
+
+    <div id='--dialog' class='dialog'><div class='wrapper'>
+        <div id='--dialog-del' class='del-btn hide' onclick='Dialog.reset()'></div>
+        <div id='--dialog-cnt' class='contents'></div>
+    </div></div>
+    <div class="idpw page-cap m-top-50">프로필 정보를 아래 서식에 맞게 입력해주세요.</div>
+    <div class="m-top-20">
+        <div class="edit-box bdtop">
+            <div class="text">성별</div>
+            <select id="--gender">
+                <option value="none" style="color:#999">성별을 선택해주세요.</option>
+                <option value="m">남성</option>
+                <option value="f">여성</option>
+            </select>
+        </div>
+        <div class="edit-box bdtop">
+            <div class="text">생년월일</div>
+            <input id="--birth" class="input user" type="date">
+        </div>
+        <div class="edit-box bdtop">
+            <div class="text">이름</div>
+            <input id="--name" class="input user" type="text" placeholder="이름 (닉네임)">
+            <div class="icon pen hide" onclick="setFocus('#--name')"></div>
+        </div>
+        <div class="edit-box bdtop">
+            <div class="text">핸드폰</div>
+            <input id="--tel" class="input user" type="text" placeholder="휴대폰 번호">
+            <div class="icon pen hide" onclick="setFocus('#--tel')"></div>
+        </div>
+        <div class="edit-box bdtop bdbot">
+            <div class="text">이메일</div>
+            <input id="--email" class="input user" type="text" placeholder="이메일 주소">
+            <div class="icon pen hide" onclick="setFocus('#--email')"></div>
+        </div>
+    </div>
+
+
+        <div id="h1" class="page-cap m-top-30">본인 인증을 위한 코드 입력</div>
+        <div id="h2" class="section mbot-40">
+            <div class="m-top-20">
+                <div class="edit-box bdtop bdbot">
+                    <div class="text">코드</div>
+                    <input id="--code" class="input user" style="margin: 0 20px 0 0;" readonly type="text" placeholder="이메일로 받은 코드 6자리">
+                    <span id="time_"> 03:00</span>
+                    <div class="icon pen hide" onclick="setFocus('#--email')"></div>
+                </div>
+            </div>
+        </div>
+        <form id="formP" class="hide">
+            <input id="--pass" class="hide5 mbot-20" type="password" placeholder="비밀번호">
+            <input id="--pass2" class="hide5 mbot-20" type="password" class="m-top-10" placeholder="비밀번호 (확인)">
+        </form>
+
+        <div id="search" class="indexBox button small m-top-20 mbot-20" onclick="save()">회원정보 조회</div>
+        <div id="submit" class="button small m-top-20 mbot-20 hide" onclick="submit()">제출</div>
+        <div id="submitP" class="button small m-top-20 mbot-20 hide" onclick="changePass()">비밀번호 변경</div>
+    </div>
+</div>
+<div class="page-footer"></div>
+</body>
+</html>
+<script src="../js/jquery-3.5.1.min.js"></script>
+<script src="../js/core.js"></script>
+<script type="text/javascript">
+</script>
+<script src="../js/velocity.min.js"></script>
+<script src="../js/feed.js"></script>
+<script src="../js/addr.js"></script>
+<script src="../js/image.js"></script>
+<script type="text/javascript">
+
+
+    let interval;
+    function setFocus(view) {
+        $(view).focus();
+        $(view).addClass("bdr-bot");
+    };
+
+    function setTime() {
+        $("#search").addClass("hide");
+        $("#submit").removeClass("hide");
+        $("#--code").attr('readonly', false);
+        $("#--gender").attr('readonly', true);
+        $("#--birth").attr('readonly', true);
+        $("#--name").attr('readonly', true);
+        $("#--tel").attr('readonly', true);
+        $("#--email").attr('readonly', true);
+
+        var time = 180;
+        var min = "";
+        var sec = ""
+
+        interval = setInterval(function () {
+            min = parseInt(time / 60);
+            sec = time % 60;
+            if(sec <10){
+                sec = "0"+sec;
+            }
+            $("#time_").text(`${min}:${sec}`);
+            time--;
+            if(time < 0){
+                $("#time_").text("시간 초과");
+                $("#--code").attr('readonly', true);
+                $("#--code").css("opacity", "0.6");
+                Dialog.alert("시간 초과되었습니다. 페이지를 새로 시작합니다.", function(){Page.go("pw.html")});
+            }
+        }, 1000);
+
+    };
+
+    function save(cbfunc) {
+        if (!checkInput()) return;
+
+        var usrobj = getObj();
+        console.log(usrobj);
+
+        var params = new FormData();
+        params.append("usrobj", JSON.stringify(usrobj));
+        AJAX.call("jsp/idSearch.jsp", {name:usrobj.name, gender:usrobj.gender,birth:usrobj.birth,tel:usrobj.tel, medcom: usrobj.medcom, email: usrobj.email}, function(data) {
+            if(data.trim() === "null"){
+                Dialog.alert("입력하신 정보에 해당하는 ID가 없습니다.");
+            }else{
+                Dialog.alert("비밀번호 재설정을 위한 코드가 회원님의 이메일로 발송되었습니다. 3분내에 코드를 입력해주세요.")
+                //pw생성
+                var pwcode = makeid(6);
+
+                //db저장
+                AJAX.call("jsp/pwcode.jsp", {mid: usrobj.email, pwcode: pwcode}, function(data) {});
+
+                //이메일 발송
+                //
+
+                setTime();
+            }
+        });
+    };
+
+    function checkInput() {
+        var gender = $("#--gender").val();
+        if (gender == "none") {
+            Dialog.alert("성별을 선택해주세요.", function() { $("#--gender").focus() });
+            return false;
+        };
+
+        var birth = $("#--birth").val().trim();
+        if (birth == "") {
+            Dialog.alert("성년월일을 입력해 주세요.", function() { $("#--birth").focus() });
+            return false;
+        };
+
+        var name = $("#--name").val().trim();
+        if (name == "") {
+            Dialog.alert("이름(닉네임)을 입력해 주세요.", function() { $("#--name").focus() });
+            return false;
+        };
+
+        var tel = $("#--tel").val().trim();
+        if (tel == "") {
+            Dialog.alert("휴대폰 정보를 입력해 주세요.", function() { $("#--tel").focus() });
+            return false;
+        };
+
+        if (!PhoneNum.check(tel)) {
+            Dialog.alert("휴대폰 번호를 양식에 맞게 입력해 주세요. (예. 010-xxxx-xxxx)", function() { $("#--tel").focus() });
+            return false;
+        };
+
+        var email = $("#--email").val().trim();
+        if (email == "") {
+            Dialog.alert("이메일 정보를 입력해 주세요.", function() { $("#--email").focus() });
+            return false;
+        };
+
+        return true;
+    };
+
+    function getObj() {
+        var gender = $("#--gender").val();
+        var birth = $("#--birth").val().trim();
+        var name = $("#--name").val().trim();
+        var email = $("#--email").val().trim();
+        var tel = $("#--tel").val().trim();
+        var usrobj = {
+            name: name, gender: gender, birth: birth,email:email,tel:tel
+        };
+
+        return usrobj;
+    };
+
+    function submit() {
+        var email = $("#--email").val().trim();
+        var pwcode = $("#--code").val().trim();
+        //db체크
+        AJAX.call("jsp/pwcode.jsp", {mid: email, pwcode:pwcode, type:"C"}, function(data) {
+            console.log(data);
+            console.log(typeof data);
+            if(data.trim() === "200"){
+                clearInterval(interval);
+                Dialog.alert("비밀번호 재설정 가능.");
+                $("#submit").addClass("hide");
+                $("#submitP").removeClass("hide")
+                $("#formP").removeClass("hide")
+
+            }else if(data.trim() === "3"){
+                Dialog.alert("코드 입력 횟수 초과. 페이지를 다시 실행합니다.", Page.go("pw.html"));
+            }else if(data.trim() === "2"){
+                Dialog.alert(`코드를 다시 확인해주세요. 코드 입력 가능 횟수: 1`);
+            }else if(data.trim() === "1"){
+                Dialog.alert(`코드를 다시 확인해주세요. 코드 입력 가능 횟수: 2`);
+            }else{
+                Dialog.alert("오류가 발생했습니다. 페이지를 다시 실행합니다.", Page.go("pw.html"));
+            }
+        });
+
+        return 1;
+    };
+
+    function makeid(length) {
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
+    function changePass() {
+        var mid = $("#--email").val().trim();
+        var ps1 = $("#--pass").val().trim();
+        if (ps1 == "") {
+            Dialog.alert("패스워드를 입력해주세요.", function() { $("#--pass").focus(); });
+            return null;
+        }
+        var ps2 = $("#--pass2").val().trim();
+        if (ps2 == "") {
+            Dialog.alert("패스워드를 확인해주세요.", function() { $("#--pass2").focus(); });
+            return null;
+        }
+        else if (ps1 != ps2) {
+            Dialog.alert("입력하신 두 개의 패스워드가 일치하지 않습니다.", function() { $("#--pass").focus(); });
+            return null;
+        }
+
+        AJAX.call("jsp/pwChange.jsp", {mid: mid, pass: ps1}, function(data) {
+            Dialog.alert("비밀번호 재설정이 완료되었습니다.",function() { Page.go("index.html") });
+        });
+    }
+
+
+
+
+</script>

@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Util {
-	public final static String URL = "http://localhost:8092"; // local
+//	public final static String URL = "http://localhost:8092"; // local
+//public final static String URL = "http://43.200.35.210:8080";
+public final static String URL = "https://kwweather.com";
+
 	public final static String KAKAO_RESTAPI_KEY = "1807593305b1ccc3dbc6a23074e1ecc7";
 	public static final ArrayList<String> ADMINS = new ArrayList<String>() {{
 //		/*add("");
