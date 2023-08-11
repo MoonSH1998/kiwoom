@@ -1,8 +1,8 @@
 var Config = {
-    // url: "https://localhost:8092",
+    url: "http://localhost:8092",
     // url: "http://43.200.35.210:8080",
-    url: "https://kiweather.shop",
-    ip: "43.200.35.210",
+    // url: "https://kwweather.com",
+    //ip: "43.200.35.210",
     platform: null,
 
     getUserImgUrl: function(mid, file) {
